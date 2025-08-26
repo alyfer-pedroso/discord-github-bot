@@ -20,7 +20,7 @@ github.post("/github", (req, res) => {
 
   if (event === "pull_request" && payload.action === "opened") {
     const pr = payload.pull_request;
-    const message = `🚀 New Pull Request opened by **${pr.user.login}**: ${pr.html_url}`;
+    const message = `**New Pull Request** 🚀\n- **Title**: ${pr.title}\n- **User**: ${pr.user.login}\n- **Link to PR**: ${pr.html_url}`;
 
     client.channels
       .fetch(CHANNEL_ID)
