@@ -14,21 +14,28 @@ const client = new Client({
 export const github = express.Router();
 
 // github webhook endpoint
-github.post("/github", (req, res) => {
-  const event = req.headers["x-github-event"];
-  const payload = req.body;
+github.post("/github", async (req, res) => {
+  try {
+    const event = req.headers["x-github-event"];
+    const payload = req.body;
 
-  if (event === "pull_request" && payload.action === "opened") {
-    const pr = payload.pull_request;
-    const message = `**New Pull Request** 🚀\n- **Title**: ${pr.title}\n- **User**: ${pr.user.login}\n- **Link to PR**: ${pr.html_url}`;
+    if (event === "pull_request" && payload.action === "opened") {
+      const pr = payload.pull_request;
+      const message = `**New Pull Request** 🚀\n- **Title**: ${pr.title}\n- **User**: ${pr.user.login}\n- **Link to PR**: ${pr.html_url}`;
 
-    client.channels
-      .fetch(CHANNEL_ID)
-      .then((channel) => channel.send(message))
-      .catch(console.error);
+      const channel = await client.channels.fetch(CHANNEL_ID);
+      if (channel) {
+        await channel.send(message);
+        res.status(200).send("message sent");
+      }
+
+      return;
+    }
+
+    res.status(200).send("ok");
+  } catch (error) {
+    res.status(500).send(error);
   }
-
-  res.status(200).send("ok");
 });
 
 client.once("ready", () => {
